@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>TikTok Content — Mobile</title>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --surface: #141821;
+      --surface-2: #1c2230;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f3f5f9;
+      --text-muted: #98a2b3;
+      --accent: #fe2c55;
+      --accent-soft: rgba(254, 44, 85, 0.14);
+      --cyan: #25f4ee;
+      --success: #16c784;
+      --success-soft: rgba(22, 199, 132, 0.15);
+      --warning: #f59e0b;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+      min-height: 100dvh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+
+    /* Sticky Top Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(11, 13, 18, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: calc(12px + env(safe-area-inset-top)) 14px 12px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--accent));
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(254, 44, 85, 0.6);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .count-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cyan);
+      background: rgba(37, 244, 238, 0.12);
+      border: 1px solid rgba(37, 244, 238, 0.24);
+      padding: 2px 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .btn-refresh {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-refresh:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .btn-refresh.loading,
+    .btn-refresh:disabled {
+      opacity: 0.78;
+      border-color: rgba(37, 244, 238, 0.35);
+      color: var(--cyan);
+      cursor: wait;
+    }
+
+    .btn-refresh.loading svg {
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Search Bar */
+    .search-wrap {
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 36px 0 36px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      border-color: rgba(37, 244, 238, 0.5);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-clear.visible {
+      display: flex;
+    }
+
+    /* Banner / Status */
+    .content {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .notice {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.32);
+      color: #fde68a;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .notice.error {
+      background: rgba(254, 44, 85, 0.12);
+      border-color: rgba(254, 44, 85, 0.35);
+      color: #fecdd3;
+    }
+
+    .notice code {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 1px 5px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+
+    /* Product Cards */
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .product-meta {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .meta-top {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px 8px;
+      margin-bottom: 6px;
+    }
+
+    .meta-top {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px 8px;
+      margin-bottom: 6px;
+    }
+
+    .id-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--cyan);
+      background: rgba(37, 244, 238, 0.1);
+      border: 1px solid rgba(37, 244, 238, 0.22);
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+
+    .update-at {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .product-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .title-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .title-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .title-text {
+      font-size: 14px;
+      color: #e5e9f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .title-text.empty {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .btn-copy {
+      width: 100%;
+      height: 42px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-copy:active {
+      transform: scale(0.98);
+    }
+
+    .btn-copy.copied {
+      background: var(--success);
+      color: #052e1b;
+    }
+
+    .btn-copy:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    /* Empty & Skeleton states */
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .skeleton {
+      height: 132px;
+      border-radius: var(--radius);
+      background: linear-gradient(90deg,
+          var(--surface) 25%,
+          var(--surface-2) 50%,
+          var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border: 1px solid var(--border);
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(22px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(20, 24, 33, 0.96);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 50;
+      white-space: nowrap;
+      max-width: calc(100vw - 32px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-top">
+        <div class="brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <span class="brand-title">TikTok Content</span>
+          <span id="countPill" class="count-pill">0 SP</span>
+        </div>
+        <button id="btnRefresh" class="btn-refresh loading" type="button" aria-label="Tải lại danh sách"
+          aria-busy="true" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <polyline points="21 3 21 9 15 9" />
+          </svg>
+          <span id="btnRefreshLabel">Đang tải...</span>
+        </button>
+      </div>
+
+      <div class="search-wrap">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input id="searchInput" class="search-input" type="search" placeholder="Tìm theo ID, tên sản phẩm, title..."
+          autocomplete="off" />
+        <button id="btnClearSearch" class="search-clear" type="button" aria-label="Xóa tìm kiếm">✕</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div id="statusBox"></div>
+      <div id="productList" class="list"></div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // =========================================================================
+    // CẤU HÌNH GOOGLE APPS SCRIPT WEB APP URL
+    // Sau khi Deploy file gg-app-script.js thành Web App (Anyone),
+    // dán URL vào constant GAS_WEB_APP_URL bên dưới là chạy được ngay.
+    // =========================================================================
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxcV74R3KkcqmPXjwb43wr2oO_q3qriaWBwas7wukSp7C1AOf6wXcqNh7xNSfbrrn2R/exec";
+
+    const listEl = document.getElementById("productList");
+    const statusBoxEl = document.getElementById("statusBox");
+    const countPillEl = document.getElementById("countPill");
+    const btnRefreshEl = document.getElementById("btnRefresh");
+    const btnRefreshLabelEl = document.getElementById("btnRefreshLabel");
+    const searchInputEl = document.getElementById("searchInput");
+    const btnClearSearchEl = document.getElementById("btnClearSearch");
+    const toastEl = document.getElementById("toast");
+
+    let allProducts = [];
+    let toastTimer = null;
+
+    function isPlaceholderUrl(url) {
+      return !url || url.includes("YOUR_DEPLOYMENT_ID");
+    }
+
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove("show");
+      }, 1800);
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    async function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (_) {
+          // fallback bên dưới cho iOS/Android webview hoặc HTTP thường
+        }
+      }
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-9999px";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+      let ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (_) {
+        ok = false;
+      }
+      document.body.removeChild(textarea);
+      return ok;
+    }
+
+    function setLoadingState(loading) {
+      btnRefreshEl.classList.toggle("loading", loading);
+      btnRefreshEl.disabled = loading;
+      btnRefreshEl.setAttribute("aria-busy", loading ? "true" : "false");
+      btnRefreshLabelEl.textContent = loading ? "Đang tải..." : "Tải lại";
+      if (loading) {
+        listEl.innerHTML =
+          '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+      }
+    }
+
+    function renderNotice(html, isError) {
+      statusBoxEl.innerHTML = html
+        ? `<div class="notice${isError ? " error" : ""}">${html}</div>`
+        : "";
+    }
+
+    function getFilteredProducts() {
+      const q = searchInputEl.value.trim().toLowerCase();
+      if (!q) return allProducts;
+      return allProducts.filter((item) => {
+        return (
+          (item.productId || "").toLowerCase().includes(q) ||
+          (item.productName || "").toLowerCase().includes(q) ||
+          (item.titleOnTiktok || "").toLowerCase().includes(q)
+        );
+      });
+    }
+
+    function renderProducts() {
+      const filtered = getFilteredProducts();
+      countPillEl.textContent = `${filtered.length} SP`;
+
+      if (!filtered.length) {
+        const hasSearch = searchInputEl.value.trim().length > 0;
+        listEl.innerHTML = `<div class="empty-state">${hasSearch
+            ? "Không tìm thấy sản phẩm khớp từ khóa."
+            : "Chưa có dữ liệu sản phẩm trong Sheet."
+          }</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered
+        .map((item, idx) => {
+          const titleText = String(item.titleOnTiktok || item.tiltleOnTiktok || "").trim();
+          const hasTitle = titleText.length > 0;
+          const updateAtText = String(item.updateAt || item.updatedAt || "").trim();
+          const updateAtHtml = updateAtText
+            ? `<span class="update-at" title="Cập nhật lúc">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>${escapeHtml(updateAtText)}</span>
+              </span>`
+            : "";
+          return `
+            <article class="card">
+              <div class="card-head">
+                <div class="product-meta">
+                  <div class="meta-top">
+                    <span class="id-badge">${escapeHtml(item.productId || "N/A")}</span>
+                    ${updateAtHtml}
+                  </div>
+                  <div class="product-name">${escapeHtml(item.productName || "(Chưa có tên)")}</div>
+                </div>
+              </div>
+
+              <div class="title-box">
+                <div class="title-label">titleOnTiktok</div>
+                <div class="title-text${hasTitle ? "" : " empty"}">${hasTitle ? escapeHtml(titleText) : "Chưa có nội dung titleOnTiktok"
+            }</div>
+              </div>
+
+              <button
+                class="btn-copy"
+                type="button"
+                data-idx="${idx}"
+                ${hasTitle ? "" : "disabled"}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+                <span>${hasTitle ? "Copy titleOnTiktok" : "Trống"}</span>
+              </button>
+            </article>
+          `;
+        })
+        .join("");
+
+      const buttons = listEl.querySelectorAll(".btn-copy");
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const item = filtered[Number(btn.dataset.idx)];
+          const textToCopy = String(
+            (item && (item.titleOnTiktok || item.tiltleOnTiktok)) || ""
+          ).trim();
+
+          if (!textToCopy) {
+            showToast("Chưa có nội dung titleOnTiktok");
+            return;
+          }
+
+          const ok = await copyToClipboard(textToCopy);
+          if (!ok) {
+            showToast("Không thể copy, vui lòng thử lại");
+            return;
+          }
+
+          const labelEl = btn.querySelector("span");
+          const oldText = labelEl.textContent;
+          btn.classList.add("copied");
+          labelEl.textContent = "Đã copy!";
+          showToast(`Đã copy titleOnTiktok (${item.productId || "SP"})`);
+
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            labelEl.textContent = oldText;
+          }, 1600);
+        });
+      });
+    }
+
+    let isFetching = false;
+
+    async function fetchProducts() {
+      if (isFetching) return;
+      isFetching = true;
+
+      renderNotice("", false);
+      setLoadingState(true);
+      const startedAt = Date.now();
+
+      try {
+        if (isPlaceholderUrl(GAS_WEB_APP_URL)) {
+          await new Promise((r) => setTimeout(r, 350));
+          renderNotice(
+            'Chưa cấu hình URL Web App. Mở file <code>index.html</code> và thay <code>GAS_WEB_APP_URL</code> bằng URL sau khi deploy <code>gg-app-script.js</code>.',
+            false
+          );
+          allProducts = [];
+          renderProducts();
+          return;
+        }
+
+        const separator = GAS_WEB_APP_URL.includes("?") ? "&" : "?";
+        const url = `${GAS_WEB_APP_URL}${separator}action=list&_t=${Date.now()}`;
+        const res = await fetch(url, { method: "GET", redirect: "follow" });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const json = await res.json();
+        if (!json || json.ok === false) {
+          throw new Error((json && json.error) || "Phản hồi API không hợp lệ");
+        }
+
+        const rawRows = Array.isArray(json.data) ? json.data : [];
+        allProducts = rawRows.map((row) => ({
+          rowIndex: row.rowIndex,
+          productId: String(row.productId || "").trim(),
+          productName: String(row.productName || "").trim(),
+          titleOnTiktok: String(
+            row.titleOnTiktok !== undefined ? row.titleOnTiktok : row.tiltleOnTiktok || ""
+          ).trim(),
+          updateAt: String(row.updateAt !== undefined ? row.updateAt : row.updatedAt || "").trim(),
+        }));
+
+        renderProducts();
+      } catch (err) {
+        renderNotice(
+          `Không tải được dữ liệu từ Google Apps Script: <b>${escapeHtml(
+            err && err.message ? err.message : String(err)
+          )}</b>`,
+          true
+        );
+        allProducts = [];
+        renderProducts();
+      } finally {
+        const elapsed = Date.now() - startedAt;
+        if (elapsed < 300) {
+          await new Promise((r) => setTimeout(r, 300 - elapsed));
+        }
+        setLoadingState(false);
+        isFetching = false;
+      }
+    }
+
+    btnRefreshEl.addEventListener("click", fetchProducts);
+
+    searchInputEl.addEventListener("input", () => {
+      btnClearSearchEl.classList.toggle("visible", searchInputEl.value.length > 0);
+      renderProducts();
+    });
+
+    btnClearSearchEl.addEventListener("click", () => {
+      searchInputEl.value = "";
+      btnClearSearchEl.classList.remove("visible");
+      renderProducts();
+      searchInputEl.focus();
+    });
+
+    fetchProducts();
+  </script>
+</body>
+
+</html>
