@@ -481,7 +481,7 @@
     // Sau khi Deploy file gg-app-script.js thành Web App (Anyone),
     // dán URL vào constant GAS_WEB_APP_URL bên dưới là chạy được ngay.
     // =========================================================================
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxcV74R3KkcqmPXjwb43wr2oO_q3qriaWBwas7wukSp7C1AOf6wXcqNh7xNSfbrrn2R/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxVZRRdAgEcMB9t527Jb99LebaUMVruR8Rsm_GhPoMspIAWy4PMpJHtb2JtTt_ONUFs/exec";
 
     const listEl = document.getElementById("productList");
     const statusBoxEl = document.getElementById("statusBox");
@@ -672,6 +672,50 @@
 
     let isFetching = false;
 
+    function parseUpdateAtMs(val) {
+      const s = String(val || "").trim();
+      if (!s) return 0;
+      let m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+      if (m) {
+        return new Date(
+          Number(m[1]),
+          Number(m[2]) - 1,
+          Number(m[3]),
+          Number(m[4] || 0),
+          Number(m[5] || 0),
+          Number(m[6] || 0)
+        ).getTime();
+      }
+      m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+      if (m) {
+        return new Date(
+          Number(m[3]),
+          Number(m[2]) - 1,
+          Number(m[1]),
+          Number(m[4] || 0),
+          Number(m[5] || 0),
+          Number(m[6] || 0)
+        ).getTime();
+      }
+      const parsed = Date.parse(s);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    function compareByUpdateAtDesc(a, b) {
+      const hasA = a.updateAt ? 1 : 0;
+      const hasB = b.updateAt ? 1 : 0;
+      if (hasA !== hasB) return hasB - hasA;
+
+      const msA = parseUpdateAtMs(a.updateAt);
+      const msB = parseUpdateAtMs(b.updateAt);
+      if (msA !== msB) return msB - msA;
+
+      if (a.updateAt !== b.updateAt) {
+        return String(b.updateAt || "").localeCompare(String(a.updateAt || ""));
+      }
+      return Number(b.rowIndex || 0) - Number(a.rowIndex || 0);
+    }
+
     async function fetchProducts() {
       if (isFetching) return;
       isFetching = true;
@@ -706,15 +750,17 @@
         }
 
         const rawRows = Array.isArray(json.data) ? json.data : [];
-        allProducts = rawRows.map((row) => ({
-          rowIndex: row.rowIndex,
-          productId: String(row.productId || "").trim(),
-          productName: String(row.productName || "").trim(),
-          titleOnTiktok: String(
-            row.titleOnTiktok !== undefined ? row.titleOnTiktok : row.tiltleOnTiktok || ""
-          ).trim(),
-          updateAt: String(row.updateAt !== undefined ? row.updateAt : row.updatedAt || "").trim(),
-        }));
+        allProducts = rawRows
+          .map((row) => ({
+            rowIndex: row.rowIndex,
+            productId: String(row.productId || "").trim(),
+            productName: String(row.productName || "").trim(),
+            titleOnTiktok: String(
+              row.titleOnTiktok !== undefined ? row.titleOnTiktok : row.tiltleOnTiktok || ""
+            ).trim(),
+            updateAt: String(row.updateAt !== undefined ? row.updateAt : row.updatedAt || "").trim(),
+          }))
+          .sort(compareByUpdateAtDesc);
 
         renderProducts();
       } catch (err) {
